@@ -1,0 +1,224 @@
+{
+  "users": [
+    {
+      "id": "user-raph",
+      "name": "Raphaël Morin",
+      "avatar_initials": "RM",
+      "role": "Staff Engineer",
+      "team_id": "team-search",
+      "joined_at": "2021-03-01",
+      "expertise_tags": ["elasticsearch", "search", "ML", "performance", "infrastructure"]
+    },
+    {
+      "id": "user-camille",
+      "name": "Camille Durand",
+      "avatar_initials": "CD",
+      "role": "Engineering Manager",
+      "team_id": "team-mobile",
+      "joined_at": "2020-06-15",
+      "expertise_tags": ["mobile", "BFF", "graphql", "api", "architecture"]
+    },
+    {
+      "id": "user-theo",
+      "name": "Théo Legrand",
+      "avatar_initials": "TL",
+      "role": "Platform Lead",
+      "team_id": "team-platform",
+      "joined_at": "2019-09-01",
+      "expertise_tags": ["observability", "infrastructure", "datadog", "CI/CD", "GCP"]
+    },
+    {
+      "id": "user-sonia",
+      "name": "Sonia Berrada",
+      "avatar_initials": "SB",
+      "role": "Head of Design",
+      "team_id": "team-design",
+      "joined_at": "2022-01-10",
+      "expertise_tags": ["design-system", "accessibilité", "UI", "UX", "composants"]
+    },
+    {
+      "id": "user-lucie",
+      "name": "Lucie Mercier",
+      "avatar_initials": "LM",
+      "role": "Product Manager",
+      "team_id": "team-pro",
+      "joined_at": "2021-10-01",
+      "expertise_tags": ["pro", "monetisation", "pricing", "B2B", "product"]
+    },
+    {
+      "id": "user-marc",
+      "name": "Marc Fontaine",
+      "avatar_initials": "MF",
+      "role": "Engineering Manager",
+      "team_id": "team-payment",
+      "joined_at": "2020-02-01",
+      "expertise_tags": ["payment", "PSP", "fraude", "compliance", "stripe"]
+    },
+    {
+      "id": "user-agathe",
+      "name": "Agathe Roux",
+      "avatar_initials": "AR",
+      "role": "Data Engineer Lead",
+      "team_id": "team-data",
+      "joined_at": "2022-05-16",
+      "expertise_tags": ["data", "tracking", "RGPD", "dbt", "analytics"]
+    },
+    {
+      "id": "user-felix",
+      "name": "Félix Nguyen",
+      "avatar_initials": "FN",
+      "role": "Senior Frontend Engineer",
+      "team_id": "team-frontend",
+      "joined_at": "2023-01-03",
+      "expertise_tags": ["frontend", "react", "tooling", "DX", "pnpm", "design-system"]
+    },
+    {
+      "id": "user-nadia",
+      "name": "Nadia Karim",
+      "avatar_initials": "NK",
+      "role": "VP Engineering",
+      "team_id": "team-leadership",
+      "joined_at": "2019-04-01",
+      "expertise_tags": ["leadership", "budget", "RH", "architecture", "process"]
+    },
+    {
+      "id": "user-kevin",
+      "name": "Kevin Lambert",
+      "avatar_initials": "KL",
+      "role": "SRE Engineer",
+      "team_id": "team-platform",
+      "joined_at": "2021-07-01",
+      "expertise_tags": ["SRE", "infrastructure", "monitoring", "incidents", "GCP"]
+    }
+  ],
+  "teams": [
+    {
+      "id": "team-search",
+      "name": "Search",
+      "description": "Moteur de recherche, ranking, suggestions, recherche sémantique",
+      "color": "#6366f1",
+      "lead_id": "user-raph",
+      "member_ids": ["user-raph", "user-sonia"]
+    },
+    {
+      "id": "team-mobile",
+      "name": "Mobile",
+      "description": "Applications iOS et Android, BFF mobile, expérience native",
+      "color": "#0ea5e9",
+      "lead_id": "user-camille",
+      "member_ids": ["user-camille", "user-felix", "user-kevin"]
+    },
+    {
+      "id": "team-platform",
+      "name": "Platform",
+      "description": "Infrastructure, observabilité, CI/CD, developer experience backend",
+      "color": "#f59e0b",
+      "lead_id": "user-theo",
+      "member_ids": ["user-theo", "user-kevin"]
+    },
+    {
+      "id": "team-design",
+      "name": "Design & DS",
+      "description": "Design system Bazar UI, design ops, accessibilité, guidelines visuelles",
+      "color": "#ec4899",
+      "lead_id": "user-sonia",
+      "member_ids": ["user-sonia", "user-felix", "user-lucie", "user-agathe"]
+    },
+    {
+      "id": "team-pro",
+      "name": "Pro & Monétisation",
+      "description": "Offre pros, pricing, abonnements, relation annonceurs",
+      "color": "#10b981",
+      "lead_id": "user-lucie",
+      "member_ids": ["user-lucie", "user-marc", "user-agathe", "user-felix"]
+    },
+    {
+      "id": "team-payment",
+      "name": "Payment",
+      "description": "PSP, checkout, fraude, wallet vendeur, conformité financière",
+      "color": "#ef4444",
+      "lead_id": "user-marc",
+      "member_ids": ["user-marc", "user-nadia", "user-felix"]
+    },
+    {
+      "id": "team-data",
+      "name": "Data",
+      "description": "Tracking, pipelines analytiques, RGPD data, data warehouse",
+      "color": "#8b5cf6",
+      "lead_id": "user-agathe",
+      "member_ids": ["user-agathe", "user-nadia", "user-kevin", "user-theo"]
+    },
+    {
+      "id": "team-frontend",
+      "name": "Frontend Guild",
+      "description": "Tooling front, standards, performances web, accessibilité",
+      "color": "#14b8a6",
+      "lead_id": "user-felix",
+      "member_ids": ["user-felix", "user-camille", "user-kevin"]
+    },
+    {
+      "id": "team-leadership",
+      "name": "Leadership",
+      "description": "Direction technique, budget, décisions transverses",
+      "color": "#64748b",
+      "lead_id": "user-nadia",
+      "member_ids": ["user-nadia", "user-marc", "user-lucie"]
+    }
+  ],
+  "categories": [
+    {
+      "id": "architecture",
+      "label": "Architecture",
+      "description": "Décisions structurantes sur le système, patterns, stack technique",
+      "icon": "layers",
+      "color": "#6366f1"
+    },
+    {
+      "id": "product",
+      "label": "Produit",
+      "description": "Features, abandon de features, pivots, priorisation",
+      "icon": "package",
+      "color": "#10b981"
+    },
+    {
+      "id": "vendor",
+      "label": "Prestataire / Outil",
+      "description": "Choix ou remplacement d'un outil SaaS, d'un fournisseur, d'un PSP",
+      "icon": "shopping-bag",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "process",
+      "label": "Process",
+      "description": "Organisation, rituels, standards d'équipe, conventions",
+      "icon": "git-branch",
+      "color": "#0ea5e9"
+    }
+  ],
+  "statuses": [
+    {
+      "id": "active",
+      "label": "Active",
+      "description": "Décision en vigueur, appliquée dans le système",
+      "color": "#10b981"
+    },
+    {
+      "id": "superseded",
+      "label": "Remplacée",
+      "description": "Décision obsolète, remplacée par une décision plus récente",
+      "color": "#94a3b8"
+    },
+    {
+      "id": "abandoned",
+      "label": "Abandonnée",
+      "description": "Décision ou initiative stoppée avant sa mise en production",
+      "color": "#ef4444"
+    },
+    {
+      "id": "draft",
+      "label": "Brouillon",
+      "description": "Décision en cours de discussion, pas encore validée",
+      "color": "#f59e0b"
+    }
+  ]
+}

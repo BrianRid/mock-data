@@ -1,0 +1,324 @@
+[
+  {
+    "id": "DEC-001",
+    "title": "Migration du moteur de recherche vers Elasticsearch 8",
+    "created_at": "2024-02-14T10:30:00Z",
+    "updated_at": "2024-02-14T10:30:00Z",
+    "status": "active",
+    "category": "architecture",
+    "team_id": "team-search",
+    "author_id": "user-raph",
+    "context": "Notre cluster ES 6.8 approchait de la fin de support officiel (EOL jan 2024). Les requêtes géospatiales sur les annonces immobilières dépassaient régulièrement les 800ms en P99, causant des timeouts visibles en prod. Deux incidents majeurs en Q4 2023 ont forcé une décision formelle.",
+    "decision": "Migrer vers Elasticsearch 8.12 avec une stratégie blue-green sur 6 semaines. Adoption du nouveau format de mapping dense_vector pour les embeddings de recherche sémantique.",
+    "consequences": [
+      "Compatibilité rompue avec les plugins internes legacy — nécessite un sprint de migration dédié",
+      "Amélioration attendue de 40% sur les queries géospatiales selon les benchmarks internes",
+      "Introduction d'une dépendance à Elastic Cloud pour le tiering des données froides"
+    ],
+    "alternatives": [
+      {
+        "title": "OpenSearch 2.x (fork AWS)",
+        "reason_rejected": "La communauté interne avait plus d'expertise ES. Le tooling de monitoring existant (Kibana) aurait dû être remplacé par OpenDashboards — coût de migration estimé trop élevé sur le court terme."
+      },
+      {
+        "title": "Rester sur ES 6.8 avec patch de sécurité interne",
+        "reason_rejected": "Non viable au-delà de 6 mois. Aucun support officiel, et les vulnérabilités CVE accumulées auraient bloqué le prochain audit sécurité."
+      },
+      {
+        "title": "Remplacer ES par Typesense pour la recherche full-text",
+        "reason_rejected": "Typesense ne supporte pas les agrégations complexes utilisées dans les facettes de filtre. Trop risqué pour le scope de recherche principale."
+      }
+    ],
+    "tags": ["elasticsearch", "search", "migration", "performance", "infrastructure"],
+    "related_decision_ids": ["DEC-007"],
+    "slack_thread_url": "https://leboncoin.slack.com/archives/C0SEARCH/p1707904200",
+    "participants": ["user-raph", "user-camille", "user-theo", "user-sonia"]
+  },
+  {
+    "id": "DEC-002",
+    "title": "Abandon de la feature 'Offre groupée' pour les pros",
+    "created_at": "2024-03-05T14:00:00Z",
+    "updated_at": "2024-03-05T14:00:00Z",
+    "status": "abandoned",
+    "category": "product",
+    "team_id": "team-pro",
+    "author_id": "user-lucie",
+    "context": "Développée pendant 3 sprints (6 semaines), la feature permettait aux annonceurs pros d'acheter des packs d'annonces en lot avec une remise dégressive. Mise en beta privée en janvier 2024 auprès de 50 comptes pros.",
+    "decision": "Arrêt définitif du développement et retrait de la beta. La feature ne sera pas livrée en GA.",
+    "consequences": [
+      "3 sprints de développement non capitalisables directement",
+      "Les 50 comptes beta informés individuellement par l'équipe Sales",
+      "Le pricing dégressive sera exploré dans un contexte différent (abonnement mensuel)"
+    ],
+    "alternatives": [
+      {
+        "title": "Continuer vers un MVP réduit (sans remise dégressive)",
+        "reason_rejected": "Les interviews post-beta ont montré que c'est précisément la remise dégressive qui était l'unique driver d'achat. Un pack sans remise n'aurait pas de traction."
+      },
+      {
+        "title": "Pivoter vers un système de crédits rechargeable",
+        "reason_rejected": "Requiert des changements profonds dans le système de facturation (DAC7 + TVA intracommunautaire). Hors scope pour Q1, repoussé à la roadmap 2025."
+      }
+    ],
+    "tags": ["pro", "monetisation", "beta", "abandon", "pricing"],
+    "related_decision_ids": ["DEC-009"],
+    "slack_thread_url": "https://leboncoin.slack.com/archives/C0PROX/p1709647200",
+    "participants": ["user-lucie", "user-marc", "user-agathe", "user-felix"]
+  },
+  {
+    "id": "DEC-003",
+    "title": "Choix de Datadog comme plateforme d'observabilité unifiée",
+    "created_at": "2023-11-20T09:15:00Z",
+    "updated_at": "2023-11-20T09:15:00Z",
+    "status": "active",
+    "category": "vendor",
+    "team_id": "team-platform",
+    "author_id": "user-theo",
+    "context": "Situation héritée : Prometheus + Grafana pour les métriques, ELK pour les logs, Jaeger pour le tracing. Trois outils, trois équipes qui maintiennent, zéro corrélation native entre un log et une trace. Les post-mortems prenaient en moyenne 4h de plus que chez nos benchmarks sectoriels.",
+    "decision": "Consolidation sur Datadog APM + Logs + RUM. Migration progressive sur 12 mois, en commençant par les 5 services les plus critiques (search, listing, payment, auth, notification).",
+    "consequences": [
+      "Coût annuel estimé à 480k€ — validé par le CFO en échange d'un objectif de réduction de 30% du MTTR",
+      "Dépréciation progressive du stack Prometheus/Grafana interne (maintenu en parallèle 6 mois)",
+      "Formation obligatoire pour les 40 engineers backend avant fin Q1 2024"
+    ],
+    "alternatives": [
+      {
+        "title": "Grafana Cloud (stack unifié Grafana/Loki/Tempo)",
+        "reason_rejected": "Très compétitif techniquement, mais l'équipe plateforme n'avait pas la bande passante pour gérer une migration Prometheus → remote_write à grande échelle. Datadog offrait une ingest automatique via l'agent."
+      },
+      {
+        "title": "Construire en interne sur OpenTelemetry + ClickHouse",
+        "reason_rejected": "Estimé à 2 engineers dédiés pendant 18 mois. Décision prise de ne pas investir en infra observabilité custom quand des solutions SaaS matures existent."
+      },
+      {
+        "title": "New Relic",
+        "reason_rejected": "Moins bon scoring lors du POC sur la corrélation APM ↔ logs. UX jugée inférieure lors des tests utilisateurs internes avec les engineers."
+      }
+    ],
+    "tags": ["observability", "datadog", "APM", "logs", "infrastructure", "vendor"],
+    "related_decision_ids": [],
+    "slack_thread_url": "https://leboncoin.slack.com/archives/C0PLATFORM/p1700471700",
+    "participants": ["user-theo", "user-sonia", "user-raph", "user-nadia", "user-kevin"]
+  },
+  {
+    "id": "DEC-004",
+    "title": "Adoption du pattern BFF (Backend for Frontend) pour l'app mobile",
+    "created_at": "2023-09-12T11:00:00Z",
+    "updated_at": "2024-01-08T16:00:00Z",
+    "status": "active",
+    "category": "architecture",
+    "team_id": "team-mobile",
+    "author_id": "user-camille",
+    "context": "L'app iOS et Android consommait directement 14 microservices différents. Chaque écran nécessitait en moyenne 6 appels réseau distincts. La latence perçue sur la home était de 1.8s en médiane sur 3G. Les équipes mobile bloquaient régulièrement sur des contrats d'API pensés pour le web.",
+    "decision": "Création d'un BFF dédié mobile (Node.js / GraphQL) maintenu conjointement par les équipes mobile et backend. Le BFF agrège, transforme et cache les données pour les besoins spécifiques du client mobile.",
+    "consequences": [
+      "Réduction de 6 à 1.2 appels réseau en médiane par écran",
+      "Latence home réduite à 620ms médiane — mesurée 8 semaines post-déploiement",
+      "Ajout d'une couche à maintenir : le BFF lui-même doit être versioned et backward-compatible"
+    ],
+    "alternatives": [
+      {
+        "title": "GraphQL fédéré (Apollo Federation) sur les microservices existants",
+        "reason_rejected": "Nécessitait de modifier les 14 microservices pour exposer des subgraphs. Trop de coordination inter-équipes, estimé à 4 mois. Le BFF permettait de démarrer en 3 semaines sans toucher aux services upstream."
+      },
+      {
+        "title": "REST API Gateway avec aggregation (Kong / AWS API GW)",
+        "reason_rejected": "Les transformations métier nécessaires (ex: enrichissement des annonces avec les scores de confiance) ne pouvaient pas être exprimées dans la config declarative d'un gateway standard."
+      }
+    ],
+    "tags": ["BFF", "mobile", "architecture", "graphql", "performance", "api"],
+    "related_decision_ids": ["DEC-001"],
+    "slack_thread_url": "https://leboncoin.slack.com/archives/C0MOBILE/p1694512800",
+    "participants": ["user-camille", "user-felix", "user-raph", "user-kevin"]
+  },
+  {
+    "id": "DEC-005",
+    "title": "Gel des recrutements prestataires pour les squads core en Q2 2024",
+    "created_at": "2024-04-01T08:30:00Z",
+    "updated_at": "2024-04-01T08:30:00Z",
+    "status": "superseded",
+    "category": "process",
+    "team_id": "team-leadership",
+    "author_id": "user-nadia",
+    "context": "Suite à la revue budgétaire Q1, le ratio prestataires/salariés avait atteint 38% dans les squads core (search, listing, payment). Deux incidents post-mortems en mars avaient identifié un manque de context métier chez les prestataires comme facteur aggravant. Le board a demandé un plan de réduction.",
+    "decision": "Gel de tout nouveau recrutement prestataire dans les squads core pendant Q2. Les contrats existants reconduits uniquement si le TL valide un plan de transfert de compétences documenté.",
+    "consequences": [
+      "Capacité de delivery estimée en baisse de 15% pendant la période de transition",
+      "3 prestataires dont les contrats arrivent à terme en avril non reconduits",
+      "Ouverture de 5 postes CDI en parallèle pour compenser à terme"
+    ],
+    "alternatives": [
+      {
+        "title": "Réduire les prestataires uniquement dans la squad payment (plus sensible)",
+        "reason_rejected": "Le problème de contexte métier était transverse. Une action ciblée n'aurait pas adressé le fond du problème et aurait créé un précédent de demi-mesure."
+      },
+      {
+        "title": "Maintenir le statu quo avec un programme de formation accéléré",
+        "reason_rejected": "Jugé insuffisant par le board. Le risque systémique d'une connaissance trop concentrée chez des non-permanents restait entier."
+      }
+    ],
+    "tags": ["RH", "prestataires", "recrutement", "budget", "process"],
+    "related_decision_ids": [],
+    "slack_thread_url": null,
+    "participants": ["user-nadia", "user-marc", "user-lucie"]
+  },
+  {
+    "id": "DEC-006",
+    "title": "Remplacement de Segment par RudderStack (self-hosted) pour le tracking",
+    "created_at": "2023-07-18T13:45:00Z",
+    "updated_at": "2023-07-18T13:45:00Z",
+    "status": "active",
+    "category": "vendor",
+    "team_id": "team-data",
+    "author_id": "user-agathe",
+    "context": "Après l'entrée en vigueur des nouvelles guidelines CNIL sur le transfert de données hors UE, le DPO a signalé que Segment (hébergé AWS us-east-1) n'était plus conforme sans SCCs additionnels complexes. Par ailleurs, la facture Segment avait augmenté de 60% en 18 mois suite à la croissance du volume d'événements.",
+    "decision": "Migration vers RudderStack auto-hébergé sur notre infra GCP eu-west1. L'équipe data prend ownership de la plateforme. Migration des 200+ sources/destinations sur 10 semaines.",
+    "consequences": [
+      "Économie estimée à 180k€/an vs Segment à volume équivalent",
+      "Conformité RGPD renforcée — données ne quittent plus l'UE",
+      "Charge opérationnelle ajoutée pour l'équipe data : estimée à 0.5 ETP/an pour la maintenance"
+    ],
+    "alternatives": [
+      {
+        "title": "Rester sur Segment avec mise en place de SCCs et DPA renforcé",
+        "reason_rejected": "Juridiquement fragile selon le DPO. Le risque d'un audit CNIL défavorable était jugé trop élevé, indépendamment du coût."
+      },
+      {
+        "title": "Snowplow Analytics (open source)",
+        "reason_rejected": "Moins de connecteurs natifs que RudderStack. La migration aurait nécessité de réécrire une partie des transformations dbt existantes."
+      }
+    ],
+    "tags": ["data", "tracking", "RGPD", "vendor", "self-hosted", "rudderstack"],
+    "related_decision_ids": [],
+    "slack_thread_url": "https://leboncoin.slack.com/archives/C0DATA/p1689680700",
+    "participants": ["user-agathe", "user-nadia", "user-kevin", "user-theo"]
+  },
+  {
+    "id": "DEC-007",
+    "title": "Introduction de la recherche sémantique vectorielle sur les annonces véhicules",
+    "created_at": "2024-05-10T10:00:00Z",
+    "updated_at": "2024-05-10T10:00:00Z",
+    "status": "active",
+    "category": "product",
+    "team_id": "team-search",
+    "author_id": "user-raph",
+    "context": "Les requêtes de type 'voiture familiale pas chère pour camping' retournaient des résultats pertinents dans seulement 34% des cas (mesure interne NPS requêtes longues). Les utilisateurs reformulaient en moyenne 2.3 fois avant de cliquer. Un test A/B sur une cohorte de 5% avec embeddings OpenAI avait montré +22% de CTR.",
+    "decision": "Déploiement progressif (10% → 50% → 100%) de la recherche vectorielle sur la verticale véhicules. Utilisation des embeddings multilangues text-embedding-3-large stockés dans le champ dense_vector d'ES 8 (cf. DEC-001). Reranking hybride BM25 + cosine similarity.",
+    "consequences": [
+      "Coût additionnel estimé à 8k€/mois (appels API OpenAI pour l'indexation + requêtes)",
+      "Latence de recherche P95 à surveiller : +80ms en moyenne sur le pipeline de reranking",
+      "Nécessite une pipeline de ré-indexation des 12M d'annonces véhicules actives"
+    ],
+    "alternatives": [
+      {
+        "title": "Modèle d'embedding open source auto-hébergé (e5-large-v2)",
+        "reason_rejected": "Qualité inférieure de ~12% sur notre benchmark interne de requêtes longues. Coût GPU infra estimé comparable à l'API OpenAI à notre volume."
+      },
+      {
+        "title": "Amélioration du moteur de synonymes et correction orthographique Elasticsearch",
+        "reason_rejected": "Adresse les erreurs de frappe mais pas la compréhension sémantique. Gain estimé à +5% CTR max selon l'équipe search."
+      }
+    ],
+    "tags": ["search", "ML", "embeddings", "openai", "elasticsearch", "vehicules"],
+    "related_decision_ids": ["DEC-001"],
+    "slack_thread_url": "https://leboncoin.slack.com/archives/C0SEARCH/p1715335200",
+    "participants": ["user-raph", "user-camille", "user-agathe", "user-sonia"]
+  },
+  {
+    "id": "DEC-008",
+    "title": "Standardisation sur pnpm pour tous les projets frontend",
+    "created_at": "2024-01-22T09:00:00Z",
+    "updated_at": "2024-01-22T09:00:00Z",
+    "status": "active",
+    "category": "process",
+    "team_id": "team-frontend",
+    "author_id": "user-felix",
+    "context": "Coexistence de npm, yarn classic, et yarn berry sur les ~30 repos frontend. Les onboardings de nouveaux devs prenaient 1.5 jours en moyenne juste pour configurer l'environnement local. Les node_modules représentaient 40GB sur les runners CI — principal poste de coût du pipeline GitHub Actions.",
+    "decision": "Migration obligatoire vers pnpm 8 pour tous les nouveaux projets et tous les projets actifs avant fin Q1 2024. Un guide de migration et un template repo canonique seront maintenus par le guild frontend.",
+    "consequences": [
+      "Réduction de 65% de l'espace node_modules via le store centralisé pnpm",
+      "Temps d'install CI réduit de 4min12s à 47s en moyenne (mesuré sur 5 repos pilotes)",
+      "Quelques packages incompatibles avec le hoisting strict de pnpm — liste de workarounds documentée"
+    ],
+    "alternatives": [
+      {
+        "title": "Standardiser sur yarn berry (PnP mode)",
+        "reason_rejected": "Le mode Plug'n'Play cassait trop d'outils de l'écosystème (jest, storybook, certains loaders webpack). La friction de migration était jugée plus haute."
+      },
+      {
+        "title": "Garder npm mais imposer npm workspaces + .npmrc unifié",
+        "reason_rejected": "npm reste significativement plus lent que pnpm et yarn sur les installations à froid. Pas de gain réel sur le coût CI."
+      }
+    ],
+    "tags": ["frontend", "tooling", "pnpm", "CI", "DX", "process"],
+    "related_decision_ids": [],
+    "slack_thread_url": "https://leboncoin.slack.com/archives/C0FRONTEND/p1705917600",
+    "participants": ["user-felix", "user-camille", "user-kevin"]
+  },
+  {
+    "id": "DEC-009",
+    "title": "Adoption de Stripe comme PSP principal (remplacement de PayPlug)",
+    "created_at": "2023-05-30T14:00:00Z",
+    "updated_at": "2023-05-30T14:00:00Z",
+    "status": "active",
+    "category": "vendor",
+    "team_id": "team-payment",
+    "author_id": "user-marc",
+    "context": "PayPlug, notre PSP historique, ne supportait pas les paiements en devises multiples — bloquant l'expansion en Belgique et au Portugal. Le taux d'échec des paiements était de 4.2% vs une médiane marché à 1.8%. Deux grandes features produit (paiement en 3x, wallet vendeur) étaient bloquées faute d'APIs adaptées.",
+    "decision": "Migration complète vers Stripe (Payments + Connect + Radar pour la fraude). Maintien de PayPlug en fallback passif pendant 6 mois. Go-live mars 2024.",
+    "consequences": [
+      "Taux d'échec réduit à 1.6% post-migration (mesuré sur les 4 premières semaines)",
+      "Débloque les roadmaps paiement 3x et wallet vendeur — estimé à +8% conversion sur la verticale autos",
+      "Coût de transaction légèrement supérieur (+0.15%) compensé par la baisse des échecs"
+    ],
+    "alternatives": [
+      {
+        "title": "Adyen",
+        "reason_rejected": "Excellent pour les très grands volumes (>100M€/an) mais pricing et intégration jugés trop complexes pour notre taille. Support PME moins bon que Stripe."
+      },
+      {
+        "title": "Braintree (PayPal)",
+        "reason_rejected": "Moins bonne réputation DX selon le benchmark des engineering blogs. Documentation API jugée inférieure. L'équipe avait déjà une expertise partielle Stripe."
+      },
+      {
+        "title": "Développer un module de routing multi-PSP (PayPlug + Mangopay + CB)",
+        "reason_rejected": "Estimé à 6 mois de développement pour une équipe payment de 4 personnes. Risque opérationnel trop élevé vs adoption d'un PSP full-service."
+      }
+    ],
+    "tags": ["payment", "stripe", "PSP", "vendor", "migration", "expansion"],
+    "related_decision_ids": ["DEC-002"],
+    "slack_thread_url": "https://leboncoin.slack.com/archives/C0PAYMENT/p1685448000",
+    "participants": ["user-marc", "user-nadia", "user-felix", "user-lucie"]
+  },
+  {
+    "id": "DEC-010",
+    "title": "Mise en place d'un Design System unifié (Bazar UI)",
+    "created_at": "2023-03-15T10:00:00Z",
+    "updated_at": "2024-03-01T10:00:00Z",
+    "status": "active",
+    "category": "product",
+    "team_id": "team-design",
+    "author_id": "user-sonia",
+    "context": "Audit Q4 2022 : 6 implémentations différentes du composant 'Card annonce' dans 6 repos distincts. Les designers et devs passaient 30% de leur temps à re-implémenter des composants existants. Onboarding d'un nouveau dev frontend estimé à 3 semaines avant d'être autonome sur les patterns visuels.",
+    "decision": "Création de 'Bazar UI' — design system interne open-source basé sur Radix Primitives + Tailwind. Gouvernance via un guild transverse (2 designers + 2 devs de chaque squad). Composants publiés en npm package interne sur le registry Artifactory.",
+    "consequences": [
+      "Adoption à 78% sur les projets actifs après 12 mois (KPI cible : 80%)",
+      "Réduction du temps d'implémentation d'une nouvelle page de 4.5j à 1.8j en médiane",
+      "Maintenance du DS représente ~0.8 ETP/semaine pour le guild"
+    ],
+    "alternatives": [
+      {
+        "title": "Adopter un DS externe (MUI, Ant Design)",
+        "reason_rejected": "Les contraintes visuelles de leboncoin (orange omniprésent, typographie custom, densité d'information élevée) rendaient la personnalisation de MUI plus coûteuse que de construire sur des primitives."
+      },
+      {
+        "title": "Storybook partagé sans package npm — copier-coller encouragé",
+        "reason_rejected": "Reproduit le problème de divergence à terme. Sans package versionné, impossible de propager des corrections de bugs de manière fiable."
+      }
+    ],
+    "tags": ["design-system", "frontend", "UI", "composants", "accessibilité", "radix", "tailwind"],
+    "related_decision_ids": ["DEC-008"],
+    "slack_thread_url": "https://leboncoin.slack.com/archives/C0DESIGN/p1678874400",
+    "participants": ["user-sonia", "user-felix", "user-camille", "user-lucie", "user-agathe"]
+  }
+]
